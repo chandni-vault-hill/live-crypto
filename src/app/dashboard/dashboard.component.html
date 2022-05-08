@@ -1,0 +1,9 @@
+<section
+  class="-mt-32 max-w-7xl mx-auto relative z-10 pb-32 px-4 sm:px-6 lg:px-8"
+>
+  <div class="grid grid-cols-1 gap-y-20 lg:grid-cols-3 lg:gap-y-10 lg:gap-x-8">
+    <div *ngFor="let obj of currencies">
+      <app-crypto-card [data]="obj"></app-crypto-card>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,19 @@
+<section
+  class="-mt-32 max-w-lg mx-auto relative z-10 pb-32 px-4 sm:px-6 lg:px-8"
+>
+  <div class="flex flex-col bg-white rounded-2xl shadow-xl">
+    <div class="flex-1 relative pt-16 px-6 pb-8 md:px-8">
+      <h3 class="text-xl font-medium text-gray-900">Add Currency</h3>
+    </div>
+    <div class="p-6 bg-gray-50 rounded-bl-2xl rounded-br-2xl md:px-8">
+      <span class="pr-4">Select...</span>
+      <app-dropdown [ddlItems]="currencies" (onChange)="onSelectionChange($event)" ></app-dropdown>
+    </div>
+    <div class="flex p-6 bg-gray-50 rounded-bl-2xl rounded-br-2xl md:px-8 text-center">
+      <button class="bg-sky-500/50 rounded-lg p-4 float-right" (click)="saveSelection()">Save</button>
+      <div class="pl-6 text-red-900" *ngIf="showErrorMessage != ''">
+        <span>{{showErrorMessage}}</span>
+      </div>
+    </div>
+  </div>
+</section>
