@@ -1,38 +1,54 @@
 import { Injectable } from '@angular/core';
-import { CryptoModal } from '../modals/index';
-import { HttpClient } from '@angular/common/http';
-import { catchError } from 'rxjs/operators';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { cryptoApiUrl } from '../constants';
-import { CryptoResponseModal } from '../modals/CryptoModal';
+import { CryptoModal, CryptoResponseModal } from '../modals/index';
+import { map, Subject } from 'rxjs';
+import { CryptoService } from './crypto.service';
+import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
+
+export const WS_ENDPOINT = 'wss://ws.coincap.io/prices?assets=ALL';
+export const WS_ENDPOINT_SELECTED_ASSETS = 'wss://ws.coincap.io/prices?assets=';
+
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class LiveCryptoService {
-  private readonly _cryptoData: BehaviorSubject<CryptoModal[]> = new BehaviorSubject<CryptoModal[]>([]);
-  public cryptoData$: Observable<CryptoModal[]> = this._cryptoData.asObservable()
+  public currencies$: Subject<CryptoResponseModal> =
+    new Subject<CryptoResponseModal>();
+  public selectedCurrencies$: Subject<CryptoModal[]> = new Subject<
+    CryptoModal[]
+  >();
+  private socket: WebSocketSubject<unknown>;
 
-  constructor(private http: HttpClient) { }
+  constructor(private cryptoService: CryptoService) {}
 
-  get cryptoData(): CryptoModal[] {
-    return this._cryptoData.getValue();
+  getAllCurrencies() {
+    this.socket = webSocket(WS_ENDPOINT);
+    this.socket.subscribe((response) => {
+      let data: CryptoResponseModal = response as CryptoResponseModal;
+      this.currencies$.next(data);
+    });
   }
 
-  set cryptoData(list: CryptoModal[]) {
-    this._cryptoData.next(list);
+  processData(response: unknown) {
+    let selectedCurrencies: CryptoModal[] = [];
+    let data: CryptoResponseModal = response as CryptoResponseModal;
+    Object.keys(data).map((key: string) => {
+      selectedCurrencies.push({
+        name: key.toUpperCase(),
+        value: `${data[key]} USD`,
+      } as CryptoModal);
+    });
+
+    this.selectedCurrencies$.next(selectedCurrencies);
   }
 
-  getAllCurrencies(): Observable<CryptoResponseModal> {
-    return this.http.get<CryptoResponseModal>(cryptoApiUrl)
-      .pipe(
-        catchError(this.handleError<CryptoResponseModal>('getAllCurrencies', {} as CryptoResponseModal))
-      );
-  }
-
-  private handleError<T>(operation = 'operation', result?: T) {
-    return (error: any): Observable<T> => {
-      console.error(`${operation} failed: ${error.message}`); 
-      return of(result as T);
-    };
+  getSelectedCurrencies(): void {
+    let cryptos: string = '';
+    this.cryptoService.currencies$.subscribe((res: CryptoModal[]) => {
+      cryptos = res.map((e) => e.name).join(',');
+    });
+    const pricesWs = new WebSocket(WS_ENDPOINT_SELECTED_ASSETS + cryptos)
+    pricesWs.onmessage = (msg) => {
+      this.processData(msg.data)
+    }
   }
 }

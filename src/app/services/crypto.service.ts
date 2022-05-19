@@ -3,22 +3,21 @@ import { BehaviorSubject } from 'rxjs';
 import { CryptoModal } from '../modals';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CryptoService {
-
   private _currencies = new BehaviorSubject<CryptoModal[]>([]);
   readonly currencies$ = this._currencies.asObservable();
- 
+
   private currencies: CryptoModal[] = [];
- 
+
   constructor() {}
 
   create(item: CryptoModal) {
     this.currencies.push(item);
-    this._currencies.next(Object.assign([], this.currencies));
+    this._currencies.next(this.currencies);
   }
- 
+
   remove(item: CryptoModal) {
     this.currencies.forEach((value, index) => {
       if (value.name == item.name) {
@@ -26,6 +25,6 @@ export class CryptoService {
       }
     });
 
-    this._currencies.next(Object.assign([], this.currencies));
+    this._currencies.next(this.currencies);
   }
 }

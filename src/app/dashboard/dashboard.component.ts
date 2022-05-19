@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
 import { CryptoModal } from '../modals/index';
 import { CryptoService } from '../services/crypto.service';
+import { LiveCryptoService } from '../services/live-crypto.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -9,16 +9,23 @@ import { CryptoService } from '../services/crypto.service';
   styleUrls: ['./dashboard.component.scss'],
 })
 export class CryptoSectionComponent implements OnInit {
-  public currencies: CryptoModal[] = [];
+  public currencies: CryptoModal[];
 
   constructor(
-    private cryptoService: CryptoService
+    private cryptoService: CryptoService,
+    private livecryptoService: LiveCryptoService,
   ) {
   }
 
   ngOnInit(): void {
     this.cryptoService.currencies$.subscribe(res => {
       this.currencies = res;
+      if(this.currencies.length > 0) {
+        this.livecryptoService.getSelectedCurrencies();
+        this.livecryptoService.selectedCurrencies$.subscribe(data => {
+          this.currencies = data;
+        });
+      }
     });
   }
 }

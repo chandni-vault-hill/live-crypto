@@ -1,1 +1,1 @@
-export { CryptoModal, CryptoResponseModal } from './CryptoModal'
+export { CryptoResponseModal, CryptoModal } from './CryptoModal'

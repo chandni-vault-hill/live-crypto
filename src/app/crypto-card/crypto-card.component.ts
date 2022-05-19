@@ -1,5 +1,4 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { CryptoModal } from '../modals';
 import { CryptoService } from '../services/crypto.service';
 
@@ -9,13 +8,13 @@ import { CryptoService } from '../services/crypto.service';
   styleUrls: ['./crypto-card.component.scss'],
 })
 export class CryptoCardComponent implements OnInit {
-  @Input() data: CryptoModal | undefined;
+  @Input() data: CryptoModal;
 
-  constructor(private router: Router, private cryptoService: CryptoService) {}
+  constructor(private cryptoService: CryptoService) {}
 
   ngOnInit(): void {}
 
-  removeSelection(value: CryptoModal | undefined): void {
+  removeSelection(value: CryptoModal): void {
     if (value) {
       this.cryptoService.remove(value);
     }

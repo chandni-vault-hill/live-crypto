@@ -1,10 +1,8 @@
 export type CryptoModal = {
-    id: string,
-    name: string,
-    symbol: string,
-    priceUsd: string
-}
+  name: string;
+  value: string;
+};
 
 export type CryptoResponseModal = {
-    data: CryptoModal[]
-}
+  [key: string]: string;
+};
