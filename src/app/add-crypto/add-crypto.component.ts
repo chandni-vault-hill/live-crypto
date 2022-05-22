@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { map } from 'rxjs';
-import { CryptoModal, CryptoResponseModal } from '../modals/index';
+import { map,  Subscription, tap } from 'rxjs';
+import { CryptoModal } from '../modals/index';
 import { CryptoService } from '../services/crypto.service';
 import { LiveCryptoService } from '../services/live-crypto.service';
 
@@ -13,6 +13,9 @@ import { LiveCryptoService } from '../services/live-crypto.service';
 export class AddCryptoComponent implements OnInit {
   public selectedCurrency: CryptoModal;
   public showErrorMessage: string = '';
+  public currencies: CryptoModal[] = [];
+  cryptoSubscription: Subscription;
+
 
   constructor(
     private liveCryptoService: LiveCryptoService,
@@ -25,20 +28,11 @@ export class AddCryptoComponent implements OnInit {
     this.getAllCryptoCurrencies();
   }
 
-  public currencies: CryptoModal[] = [];
-
   getAllCryptoCurrencies() {
     this.liveCryptoService.getAllCurrencies();
-    this.liveCryptoService.currencies$.subscribe(
-      (currencies: CryptoResponseModal) => {
-        Object.keys(currencies).map((key: string) => {
-          this.currencies.push({
-            name: key.toUpperCase(),
-            value: `${currencies[key]} USD`,
-          } as CryptoModal);
-        });
-      }
-    );
+    this.cryptoSubscription = this.liveCryptoService.currencies$.pipe(
+      tap((currencies: CryptoModal[]) => this.currencies = currencies)
+    ).subscribe();
   }
 
   saveSelection(): void {
@@ -69,5 +63,10 @@ export class AddCryptoComponent implements OnInit {
 
   onSelectionChange(value: any): void {
     this.selectedCurrency = value;
+  }
+
+  ngOnDestroy(): void {
+    this.cryptoSubscription.unsubscribe();
+    this.liveCryptoService.closeConnection();
   }
 }
